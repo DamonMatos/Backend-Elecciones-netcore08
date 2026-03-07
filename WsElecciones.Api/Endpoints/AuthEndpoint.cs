@@ -4,6 +4,7 @@ using WsElecciones.Api.Endpoints.Options;
 using WsElecciones.Api.Extensions;
 using WsElecciones.Application.DTOs;
 using WsElecciones.Application.DTOs.Auth;
+using WsElecciones.Application.DTOs.Cliente;
 using WsElecciones.Application.Features;
 
 namespace WsElecciones.Api.Endpoints
@@ -84,7 +85,33 @@ namespace WsElecciones.Api.Endpoints
 
             ).Accepts<UpdateRequestDTO>("multipart/form-data").RequireTokenAndRole("Administrador","Empresa");
 
+            return group;
+        }
 
+        public static RouteGroupBuilder MapClienteEndpoints(this IEndpointRouteBuilder app)
+        {
+            var group = app.MapGroup("/api/v1/cliente").WithTags("Cliente").RequireAuthorization();
+
+            group.MapEndpoint<ClienteDto>(
+                HttpMethodType.Get,
+                "{id:int}",
+                "GetClienteById",
+                async (
+                    int id,
+                    ClienteHandler handler,
+                    CancellationToken cancellationToken) =>
+                {
+                    var response = await handler.GetByIdAsync(id, cancellationToken)
+                                                .ConfigureAwait(false);
+
+                    if (!response.Success)
+                    {
+                        return Results.BadRequest(response);
+                    }
+                    return Results.Ok(response);
+                }, new EndpointOptions { RequireValidation = false, NotRequiredCompania = true }
+
+            );
             return group;
         }
     }

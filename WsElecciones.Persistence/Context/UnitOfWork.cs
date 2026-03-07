@@ -15,6 +15,7 @@ public class UnitOfWork : IUnitOfWork
     public IProgramacionCuentaCorrienteRepository ProgramacionCuentaCorrienteRepository { get; }
     public IAuthRepository AuthRepository { get; }
     public IEleccionesRepository EleccionesRepository { get; }
+    public IClienteRepository ClienteRepository { get; }
 
     private readonly CuentaCorrienteContext _context;
 
@@ -36,7 +37,8 @@ public class UnitOfWork : IUnitOfWork
         IProgramacionCuentaCorrienteRepository programacionCuentaCorrienteRepository,
         IPagoRepository pagoRepository,
         IAuthRepository authRepository,
-        IEleccionesRepository eleccionesRepository
+        IEleccionesRepository eleccionesRepository,
+        IClienteRepository clienteRepository
     )
     {
         this._context = _context ?? throw new ArgumentNullException(nameof(_context));
@@ -48,5 +50,6 @@ public class UnitOfWork : IUnitOfWork
         PagoRepository = pagoRepository;
         AuthRepository = authRepository;
         EleccionesRepository = eleccionesRepository;
+        ClienteRepository = clienteRepository;
     }
 }

@@ -27,6 +27,8 @@ public partial class CuentaCorrienteContext : DbContext
 
     public virtual DbSet<AppElecciones> Elecciones { get; set; }
 
+    public virtual DbSet<AppCliente> Clientes { get; set; }
+
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -293,6 +295,8 @@ public partial class CuentaCorrienteContext : DbContext
         modelBuilder.Ignore<AppUser>();
 
         modelBuilder.Ignore<AppElecciones>();
+
+        modelBuilder.Ignore<AppCliente>();
 
         OnModelCreatingPartial(modelBuilder);
     }
