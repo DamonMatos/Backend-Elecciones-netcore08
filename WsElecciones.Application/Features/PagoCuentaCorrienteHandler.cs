@@ -1,6 +1,4 @@
-﻿using Azure.Core;
-using FluentValidation;
-using WsElecciones.Application.DTOs.Pago;
+﻿using WsElecciones.Application.DTOs.Pago;
 using WsElecciones.Application.DTOs.PagoAsbanc;
 using WsElecciones.CrossCutting;
 using WsElecciones.Domain;

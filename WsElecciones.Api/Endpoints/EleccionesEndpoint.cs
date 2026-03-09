@@ -39,7 +39,3 @@ namespace WsElecciones.Api.Endpoints
     }
 }
 
-
-//var userId = httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier); 
-//var userRole = httpContext.User.FindFirstValue(ClaimTypes.Role);        
-//var correo = httpContext.User.FindFirstValue(ClaimTypes.Email);

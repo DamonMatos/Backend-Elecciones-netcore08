@@ -29,6 +29,7 @@ public static class DependencyInjection
         services.AddTransient<ICuentaCorrienteRepository, CuentaCorrienteRepository>();
         services.AddTransient<IProgramacionCuentaCorrienteRepository, ProgramacionCuentaCorrienteRepository>();
         services.AddTransient<IPagoRepository, PagoRepository>();
+        services.AddTransient<IClienteRepository, ClienteRepository>();
         services.AddTransient<IEleccionesRepository, EleccionesRepository>();
         services.AddTransient<IAuthRepository, AuthRepository>();
 

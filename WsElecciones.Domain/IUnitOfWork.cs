@@ -12,5 +12,6 @@ public interface IUnitOfWork
     IPagoRepository PagoRepository { get; }
     IAuthRepository AuthRepository { get; }
     IEleccionesRepository EleccionesRepository { get; }
+    IClienteRepository ClienteRepository { get; }
     IDbTransaction BeginTransaction();
 }

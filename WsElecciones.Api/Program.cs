@@ -75,12 +75,10 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<IFileStorageService, FileStorageService>();
-
 builder.Services.AddScoped<LoginHandler>();
 builder.Services.AddScoped<UserHandler>();
 builder.Services.AddScoped<EleccionesHandler>();
-
-
+builder.Services.AddScoped<ClienteHandler>();
 //builder.Services.AddEndpointsApiExplorer();
 //builder.Services.AddSwaggerGen();
 builder.Services.AddSwaggerWithBearer();
@@ -146,6 +144,7 @@ app.MapEleccionesEndpoints();
 app.MapUserEndpoints();
 app.MapPagoIntegracionesEndpoints();
 app.MapPagoEndpoints();
+app.MapClienteEndpoints();
 app.MapProgramacionCuentaCorrienteEndpoints();
 try
 {

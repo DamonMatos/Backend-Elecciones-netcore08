@@ -100,9 +100,7 @@ namespace WsElecciones.Application.Features
                     return Response<ResponseDTO>.Failure("Solo se permiten archivos.png", Array.Empty<string>());
                 }
                 foldername = "Personal";
-                //await using var stream = request.Foto.OpenReadStream();
 
-               // fileStorage.SaveAsync(request.Foto, cancellationToken);
                 fileStorage.SaveAsync(request.Foto, foldername, request.NombreFoto, cancellationToken);
             }
 
