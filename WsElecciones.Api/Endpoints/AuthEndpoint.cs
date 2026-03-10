@@ -81,7 +81,7 @@ namespace WsElecciones.Api.Endpoints
                     }
                     return Results.Ok(response);
                 },
-                new EndpointOptions { RequireValidation = false, NotRequiredCompania = true }
+                new EndpointOptions { RequireValidation = true, NotRequiredCompania = true }
 
             ).Accepts<UpdateRequestDTO>("multipart/form-data").RequireTokenAndRole("Administrador","Empresa");
 
