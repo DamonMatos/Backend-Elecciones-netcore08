@@ -1,41 +1,67 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WsElecciones.Domain.Interface;
-using Microsoft.AspNetCore.Http;
 
 namespace WsElecciones.CrossCutting.Storage
 {
     public class FileStorageService : IFileStorageService
     {
-        private readonly string _sharedPath;
-        private readonly string _baseUrl;
+        //private readonly string _sharedPath;
+        private readonly IOptions<FileStorageConfig> _strageOptions;
+        //private readonly string _baseUrl;
         private readonly ILogger<FileStorageService> _logger;
-        private static readonly HashSet<string> AllowedExtensions = new(StringComparer.OrdinalIgnoreCase) { ".png" };
+       // private static readonly HashSet<string> AllowedExtensions = new(StringComparer.OrdinalIgnoreCase) { ".png",".jpg" };
        // private const long MaxFileSizeBytes = 2 * 1024 * 1024;
 
-        public FileStorageService(IConfiguration configuration, ILogger<FileStorageService> logger)
+        public FileStorageService(IOptions<FileStorageConfig> storageOptions, ILogger<FileStorageService> logger)
         {
             _logger = logger;
-            _sharedPath = configuration["FileStorage:SharedPath"] ?? throw new InvalidOperationException("FileStorage:SharedPath no configurada.");
-            _baseUrl = configuration["FileStorage:BaseUrl"] ?? throw new InvalidOperationException("FileStorage:BaseUrl no configurada.");
+            _strageOptions = storageOptions;  
         }
 
-        public async void SaveAsync(IFormFile fileStream, string foldername, string fileName,CancellationToken cancellationToken = default)
+        public void CreateCarpeta(string foldername,string idEleccion,string idProceso) 
         {
-            //if (fileStream.Length > MaxFileSizeBytes)
-            //    throw new InvalidOperationException("El archivo supera el tamaño máximo permitido de 2 MB.");
+            var storage = _strageOptions.Value.Modules[foldername];
+            var _sharedPath = storage.SharedPath;
+            String Ruta = String.Format("{0}//{1}//{2}", _sharedPath.ToString(),idEleccion,idProceso);
+            if(!Directory.Exists(Ruta)) 
+            {
+                Directory.CreateDirectory(Ruta);
+            }        
+        }
 
-            var subFolder = Path.GetFileNameWithoutExtension(fileName); 
-            var folderPath = Path.Combine(_sharedPath, foldername, subFolder);
+        public void DeleteCarpeta(string foldername, string idEleccion, string idProceso)
+        {
+            var storage = _strageOptions.Value.Modules[foldername];
+            var _sharedPath = storage.SharedPath;
+            String Ruta = String.Format("{0}//{1}//{2}", _sharedPath.ToString(), idEleccion, idProceso);
+            if (Directory.Exists(Ruta))
+            {
+                Directory.Delete(Ruta,true);
+            }
+        }
 
+        public async void SaveAsync(string module, string foldername, string fileName, IFormFile fileStream, CancellationToken cancellationToken = default)
+        {
+            var storage = _strageOptions.Value.Modules[module];
+            var _sharedPath = storage.SharedPath;
+
+            //var subFolder = Path.GetFileNameWithoutExtension(fileName); 
+            //var folderPath = Path.Combine(_sharedPath, subFolder);
+            var folderPath = Path.Combine(_sharedPath, foldername);
+
+            //Crear la carpeta
             if (!Directory.Exists(folderPath))
                 Directory.CreateDirectory(folderPath);
 
+            //Crear el Archivo File 
             var fullPath = Path.Combine(folderPath, fileName);
 
             using var memoryStream = new MemoryStream();

@@ -13,11 +13,11 @@ namespace WsElecciones.Api.Endpoints
     {
         public static RouteGroupBuilder MapAuthEndpoints(this IEndpointRouteBuilder app)
         {
-           var group = app.MapGroup("/api/v1/auth").WithTags("Auth");
+            var group = app.MapGroup("/api/v1/auth").WithTags("Auth");
 
-           group.MapEndpoint<LoginResponseDTO>(
+            group.MapEndpoint<LoginResponseDTO>(
                HttpMethodType.Post,
-               String.Empty,
+               "login",
                "Login",
                async (
                    [FromBody] LoginRequestDTO request,
@@ -27,53 +27,49 @@ namespace WsElecciones.Api.Endpoints
                    var response = await handler.LoginAsync(request, cancellationToken).ConfigureAwait(false);
 
                    if (!response.Success)
-                       return Results.BadRequest(response);
-                       //return Results.Unauthorized();
+                       return Results.Unauthorized();
 
                    return Results.Ok(response);
                },new EndpointOptions { RequireValidation = false , NotRequiredCompania = true  }
                
-           );
-
-            return group;
-
-        }
-        public static RouteGroupBuilder MapUserEndpoints(this IEndpointRouteBuilder app)
-        {
-            var group = app.MapGroup("/api/v1/user").WithTags("User").DisableAntiforgery(); ;
+            );
 
             group.MapEndpoint<LoginResponseDTO>(
                 HttpMethodType.Post,
                 "register",
-                "Register",
+                "CrearUsuario",
                 async (
                     [FromBody] RegisterRequestDTO request,
                     UserHandler handler,
                     CancellationToken cancellationToken) =>
                 {
-                    var response = await handler.RegisterAsync(request, cancellationToken)
-                                                .ConfigureAwait(false);
+                    var response = await handler.RegisterAsync(request, cancellationToken).ConfigureAwait(false);
 
                     if (!response.Success)
                     {
                         return Results.BadRequest(response);
                     }
                     return Results.Ok(response);
-                },new EndpointOptions { RequireValidation = false, NotRequiredCompania = true }
+                }, new EndpointOptions { RequireValidation = false, NotRequiredCompania = true }
             );
 
+            return group;
+        }
+
+        public static RouteGroupBuilder MapUserEndpoints(this IEndpointRouteBuilder app)
+        {
+            var group = app.MapGroup("/api/v1/users").WithTags("Users").DisableAntiforgery(); 
 
             group.MapEndpoint<ResponseDTO>(
                 HttpMethodType.Put,
                 "update",
-                "Update",
+                "ActualizarUsuario",
                 async (
                     [FromForm] UpdateRequestDTO request,
                     UserHandler handler,
                     CancellationToken cancellationToken) =>
                 {
-                    var response = await handler.UpdateAsync(request, cancellationToken)
-                                                .ConfigureAwait(false);
+                    var response = await handler.UpdateAsync(request, cancellationToken).ConfigureAwait(false);
 
                     if (!response.Success)
                     {
@@ -95,22 +91,20 @@ namespace WsElecciones.Api.Endpoints
             group.MapEndpoint<ClienteDto>(
                 HttpMethodType.Get,
                 "{id:int}",
-                "GetClienteById",
+                "ObtenerClienteId",
                 async (
                     int id,
                     ClienteHandler handler,
                     CancellationToken cancellationToken) =>
                 {
-                    var response = await handler.GetByIdAsync(id, cancellationToken)
-                                                .ConfigureAwait(false);
+                    var response = await handler.GetByIdAsync(id, cancellationToken).ConfigureAwait(false);
 
                     if (!response.Success)
                     {
-                        return Results.BadRequest(response);
+                        return Results.NotFound(response);
                     }
                     return Results.Ok(response);
                 }, new EndpointOptions { RequireValidation = false, NotRequiredCompania = true }
-
             );
             return group;
         }

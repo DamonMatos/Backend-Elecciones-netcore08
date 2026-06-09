@@ -9,9 +9,9 @@ namespace WsElecciones.Application.Features
 {
     public class ClienteHandler(IUnitOfWork unitOfWork)
     {
-        public async Task<Response<IEnumerable<ClienteDto>>> GetAsync(int IdPersonal , CancellationToken cancellationToken) 
+        public async Task<Response<IEnumerable<ClienteDto>>> GetAsync(int idPersonal, CancellationToken cancellationToken) 
         {
-            var request = await unitOfWork.ClienteRepository.GetAsync(IdPersonal, cancellationToken).ConfigureAwait(false);
+            var request = await unitOfWork.ClienteRepository.GetAsync(idPersonal, cancellationToken).ConfigureAwait(false);
             var items = request.Select(x => new ClienteDto(
                 x.IdCliente,
                 x.NombreCliente,
@@ -24,25 +24,24 @@ namespace WsElecciones.Application.Features
             return Response<IEnumerable<ClienteDto>>.Ok(items);
         }
 
-        public async Task<Response<ClienteDto>> GetByIdAsync(int id, CancellationToken cancellationToken)
+        public async Task<Response<ClienteDto>> GetByIdAsync(int idPersonal, CancellationToken cancellationToken)
         { 
-                var cliente = await unitOfWork.ClienteRepository
-                    .GetByIdAsync(id, cancellationToken);
+            var cliente = await unitOfWork.ClienteRepository.GetByIdAsync(idPersonal, cancellationToken);
 
-                if (cliente is null) {
-                    return Response<ClienteDto>.Failure("Cliente no encontrado.", Array.Empty<string>());
-                }
+            if (cliente is null) {
+                return Response<ClienteDto>.Failure("Cliente no encontrado.", Array.Empty<string>());
+            }
                    
-                var dto = new ClienteDto(
-                    cliente.IdCliente,
-                    cliente.NombreCliente,
-                    cliente.EstadoCliente,
-                    cliente.RazonSocial,
-                    cliente.Ruc,
-                    cliente.IdPersonal
-                );
+            var dto = new ClienteDto(
+                cliente.IdCliente,
+                cliente.NombreCliente,
+                cliente.EstadoCliente,
+                cliente.RazonSocial,
+                cliente.Ruc,
+                cliente.IdPersonal
+            );
 
-                return Response<ClienteDto>.Ok(dto);
+            return Response<ClienteDto>.Ok(dto);
         }
     }
 }

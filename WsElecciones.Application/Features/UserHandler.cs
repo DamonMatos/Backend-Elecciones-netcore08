@@ -1,16 +1,20 @@
 ﻿using MapsterMapper;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using WsElecciones.Application.DTOs;
 using WsElecciones.Application.DTOs.Auth;
 using WsElecciones.Application.Enums;
 using WsElecciones.CrossCutting;
+using WsElecciones.CrossCutting.Storage;
 using WsElecciones.Domain;
 using WsElecciones.Domain.Entities;
 using WsElecciones.Domain.Interface;
 using WsElecciones.Domain.Views.Auth;
+using UserDto = WsElecciones.Domain.Views.Auth.UserDto;
 
 namespace WsElecciones.Application.Features
 {
-    public class UserHandler(IMapper mapper, IUnitOfWork unitOfWork, IJwtTokenService jwtTokenService, IFileStorageService fileStorage)
+    public class UserHandler(IMapper mapper, IUnitOfWork unitOfWork, IJwtTokenService jwtTokenService, IFileStorageService fileStorage, IOptions<FileStorageConfig> storageOptions)// IConfiguration config)
     {
         private static readonly HashSet<string> AllowedPublicRoles = new(StringComparer.OrdinalIgnoreCase)
         {
@@ -30,39 +34,45 @@ namespace WsElecciones.Application.Features
 
             var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Clave, workFactor: 12);
 
-            var result = await unitOfWork.AuthRepository.RegistrarUserAsysc(request.Correo, passwordHash, request.Perfil, cancellationToken);
+            var result = await unitOfWork.AuthRepository.CreateAsync(request.Correo, passwordHash, request.Perfil, cancellationToken);
 
-            var userDto = mapper.Map<IReadOnlyList<ResponseDTO>>(result);
+            var userDto = mapper.Map<ResponseDTO>(result);
 
-            if (userDto[0].Estado == (int)EstadoResultado.ConError)
+            if (userDto.Estado == (int)EstadoResultado.ConError)
             {
-                return Response<LoginResponseDTO>.Failure(userDto[0].Mensaje, Array.Empty<string>());
+                return Response<LoginResponseDTO>.Failure(userDto.Mensaje, Array.Empty<string>());
             }
 
-            var authView = await unitOfWork.AuthRepository.GetByUsernameAsync(request.Correo, cancellationToken);
+            var authView = await unitOfWork.AuthRepository.GetByEmailAsync(request.Correo, cancellationToken);
 
-            var usuario = authView.User.SingleOrDefault();
+            var usuario = authView.User;
 
             if (usuario is null)
                 return Response<LoginResponseDTO>.Failure("Usuario registrado pero no se pudo iniciar sesión.", Array.Empty<string>());
 
             var (token, expiry) = jwtTokenService.GenerateToken(usuario);
 
-            var usuarios = authView.User.Select(item => new DTOs.Auth.UserDto(
-                item.IdUsuario,
-                item.IdPersonal,
-                item.ApePatPer,
-                item.ApeMatPer,
-                item.NomPer,
-                item.TipDocPer,
-                item.NumDocPer,
-                item.FehNacPer,
-                item.FotPer,
-                item.IdPerfil,
-                item.Perfil,
-                item.Correo,
-                item.ClaveHash))
-            .ToArray();
+            var storage = storageOptions.Value.Modules["Personal"];
+            var baseUrl = storage.BaseUrl;
+
+            //var baseUrl = config["FileStorage:BaseUrl"]!;
+            var fotUrl = string.IsNullOrWhiteSpace(usuario.FotPer) ? $"{baseUrl}/user-default.png" : $"{baseUrl}/{usuario.NumDocPer.Trim()}/{usuario.FotPer}";
+
+            var user = new DTOs.Auth.UserDto(
+                usuario.IdUsuario,
+                usuario.IdPersonal,
+                usuario.ApePatPer,
+                usuario.ApeMatPer,
+                usuario.NomPer,
+                usuario.TipDocPer,
+                usuario.NumDocPer,
+                usuario.FehNacPer,
+                fotUrl,
+                usuario.IdPerfil,
+                usuario.Perfil,
+                usuario.Correo,
+                string.Empty
+            );
 
             var menu = authView.Menu
             .Select(item => new DTOs.Auth.MenuDto(
@@ -81,7 +91,7 @@ namespace WsElecciones.Application.Features
             var responseData = new LoginResponseDTO(
             token,
             expiry,
-            usuarios,
+            user,
             menu);
 
             return Response<LoginResponseDTO>.Ok(responseData);
@@ -91,7 +101,7 @@ namespace WsElecciones.Application.Features
         public async Task<Response<ResponseDTO>> UpdateAsync(UpdateRequestDTO request, CancellationToken cancellationToken)
         {
             string foldername = string.Empty;
-
+            string modulo = string.Empty;   
             if (request.Foto is not null)
             {
                 var extension = Path.GetExtension(request.Foto.FileName).ToLowerInvariant();
@@ -99,21 +109,21 @@ namespace WsElecciones.Application.Features
                 {
                     return Response<ResponseDTO>.Failure("Solo se permiten archivos.png", Array.Empty<string>());
                 }
-                foldername = "Personal";
-
-                fileStorage.SaveAsync(request.Foto, foldername, request.NombreFoto, cancellationToken);
+                foldername = request.NumeroDocumento;
+                modulo = "Personal";
+                fileStorage.SaveAsync(modulo, foldername, request.NombreFoto, request.Foto, cancellationToken);
             }
 
-            var result = await unitOfWork.AuthRepository.UpdateUserAsysc(mapper.Map<UpdateUserView>(request), cancellationToken);
+            var result = await unitOfWork.AuthRepository.UpdateAsync(mapper.Map<UpdateUserView>(request), cancellationToken);
 
-            var userDto = mapper.Map<IReadOnlyList<ResponseDTO>>(result);
+            var userDto = mapper.Map<ResponseDTO>(result);
 
-            if (userDto[0].Estado == (int)EstadoResultado.ConError)
+            if (userDto.Estado == (int)EstadoResultado.ConError)
             {
-                return Response<ResponseDTO>.Failure(userDto[0].Mensaje, Array.Empty<string>());
+                return Response<ResponseDTO>.Failure(userDto.Mensaje, Array.Empty<string>());
             }
 
-            return Response<ResponseDTO>.Ok(userDto[0]);
+            return Response<ResponseDTO>.Ok(userDto);
 
         }
 

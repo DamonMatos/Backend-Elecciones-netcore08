@@ -32,6 +32,9 @@ public static class DependencyInjection
         services.AddTransient<IClienteRepository, ClienteRepository>();
         services.AddTransient<IEleccionesRepository, EleccionesRepository>();
         services.AddTransient<IAuthRepository, AuthRepository>();
+        services.AddTransient<ISelectItemRepository, SelectRepository>();
+        services.AddTransient<IColaboradorRepository, ColaboradorRepository>();
+        services.AddTransient<ICandidatoRepository, CandidatoRepository>();
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         return services;

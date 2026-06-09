@@ -13,5 +13,8 @@ public interface IUnitOfWork
     IAuthRepository AuthRepository { get; }
     IEleccionesRepository EleccionesRepository { get; }
     IClienteRepository ClienteRepository { get; }
+    ICandidatoRepository CandidatoRepository { get; }
+    IColaboradorRepository ColaboradorRepository { get; }
+    ISelectItemRepository SelectItemRepository { get; }
     IDbTransaction BeginTransaction();
 }
