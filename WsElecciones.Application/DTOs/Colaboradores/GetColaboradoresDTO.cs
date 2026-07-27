@@ -31,5 +31,19 @@ namespace WsElecciones.Application.DTOs.Colaboradores
             int Page,
             int Limit
             );
+
+        public sealed record ColaboradoresEnvioMasivoCorreo(
+            string Correo,
+            string Clave,
+            string NombrePerfil
+            );
+
+        public class ColaboradoresEnvioMasivoCorreoTemporal
+        {
+            public string? Correo { get; set; }
+            public string? Clave { get; set; }
+        }
+
+
     }
 }

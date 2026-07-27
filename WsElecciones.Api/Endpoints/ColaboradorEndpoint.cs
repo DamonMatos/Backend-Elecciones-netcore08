@@ -1,6 +1,5 @@
-﻿using DocumentFormat.OpenXml.Math;
+﻿using Azure;
 using Microsoft.AspNetCore.Mvc;
-using System.Threading;
 using WsElecciones.Api.Endpoints.Enums;
 using WsElecciones.Api.Endpoints.Options;
 using WsElecciones.Api.Extensions;
@@ -48,23 +47,43 @@ namespace WsElecciones.Api.Endpoints
                     return Results.Ok(response);
                 }, new EndpointOptions { RequireValidation = true, NotRequiredCompania= true });
 
-            //group.MapEndpoint<GetColaboradoresDTO.ColaboradorItemDTO>(
-            //    HttpMethodType.Post,
-            //    string.Empty,
-            //    "CrearCoalaborador",
-            //    async (
-            //        [FromForm] GetColaboradoresDTO.ColaboradorItemDTO request,
-            //        ColaboradorHandler handler,
-            //        CancellationToken cancellationToken
-            //        ) => {
-            //            var response = await handler.(request, cancellationToken).ConfigureAwait(false);
 
-            //            if (!response.Success)
-            //            {
-            //                return Results.BadRequest(response);
-            //            }
-            //            return Results.Ok(response);
-            //        });
+            group.MapEndpoint<GetColaboradoresDTO.ColaboradorItemDTO>(
+                HttpMethodType.Post,
+                string.Empty,
+                "CrearColaboradores",
+                async (
+                    CrearListaColaboradorDTO request,
+                    ColaboradorHandler handler,
+                    CancellationToken cancellationToken
+                    ) =>
+                {
+                    var response = await handler.CreateColaboradoresAsync(request, cancellationToken).ConfigureAwait(false);
+                    return response.Success ? Results.Ok(response) : Results.BadRequest(response);
+
+                }, new EndpointOptions { RequireValidation = true, NotRequiredCompania = true })
+                .RequireTokenAndRole("Administrador", "Empresa");
+
+
+            group.MapEndpoint<GetColaboradoresDTO.ColaboradorItemDTO>(
+                HttpMethodType.Delete,
+                string.Empty, 
+                "EliminarColaborador",
+                async (
+                    [FromForm] DeleteColaboradorDTO request,
+                    ColaboradorHandler handler,
+                    CancellationToken cancellationToken
+                    ) =>
+                {
+                    var response = await handler.DeleteColaboradorAsync(request, cancellationToken).ConfigureAwait(false);
+
+                    if (!response.Success)
+                    {
+                        return Results.BadRequest(response);
+                    }
+                    return Results.Ok(response);
+                }, new EndpointOptions { RequireValidation = true, NotRequiredCompania = true })
+                .RequireTokenAndRole("Administrador", "Empresa");
 
             return group;
 

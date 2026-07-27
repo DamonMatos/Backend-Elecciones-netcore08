@@ -15,5 +15,7 @@ namespace WsElecciones.Domain.Interface
         Task<ResponseView> CreateAsync(string correo, string claveHash, string perfil,CancellationToken cancellationToken = default);
         Task<ResponseView> UpdateAsync(UpdateUserView request, CancellationToken cancellationToken = default);
 
+       // Task<ResponseView> UpdateAsync(UpdateUserView request, CancellationToken cancellationToken = default);
+
     }
 }

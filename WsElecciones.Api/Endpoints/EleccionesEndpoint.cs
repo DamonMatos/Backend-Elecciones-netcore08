@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Azure.Core;
+using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using System.Threading;
 using WsElecciones.Api.Endpoints.Enums;
 using WsElecciones.Api.Endpoints.Options;
 using WsElecciones.Api.Extensions;
@@ -32,7 +34,8 @@ namespace WsElecciones.Api.Endpoints
 
                     return Results.Ok(response);
                 },
-            new EndpointOptions { RequireValidation = false, NotRequiredCompania = true }
+
+                new EndpointOptions { RequireValidation = false, NotRequiredCompania = true }
 
             ).RequireTokenAndRole("Administrador","Empresa");
 
@@ -48,14 +51,15 @@ namespace WsElecciones.Api.Endpoints
                     EleccionesHandler handler,
                     CancellationToken cancellationToken) =>
                 {
-                    var response = await handler.GetById(IdCliente, IdEleccion, cancellationToken).ConfigureAwait(false);
+                    var response = await handler.GetByIdAsync(IdCliente, IdEleccion, cancellationToken).ConfigureAwait(false);
 
                     if (!response.Success)
                         return Results.Unauthorized();
 
                     return Results.Ok(response);
                 },
-            new EndpointOptions { RequireValidation = false, NotRequiredCompania = true }
+            
+                new EndpointOptions { RequireValidation = false, NotRequiredCompania = true }
 
             ).RequireTokenAndRole("Administrador", "Empresa");
 
@@ -68,15 +72,16 @@ namespace WsElecciones.Api.Endpoints
                     int IdEleccion,
                     int IdProceso,
                     HttpContext httpContext,
-                    EleccionesHandler handler,
+                    ProcesoHandler handler,
                     CancellationToken cancellationToken) =>
                 {
-                    var response = await handler.DeleteProceso(IdEleccion, IdProceso, cancellationToken).ConfigureAwait(false);
+                    var response = await handler.DeleteAsync(IdEleccion, IdProceso, cancellationToken).ConfigureAwait(false);
                     if (!response.Success)
                         return Results.Unauthorized();
                     return Results.Ok(response);
                 },
                 new EndpointOptions { RequireValidation = false, NotRequiredCompania = true }
+
             ).RequireTokenAndRole("Administrador", "Empresa");
 
             group.MapEndpoint<ResponseDTO>(
@@ -99,6 +104,27 @@ namespace WsElecciones.Api.Endpoints
                 new EndpointOptions { RequireValidation = true, NotRequiredCompania = true }
 
             ).Accepts<ResponseDTO>("multipart/form-data").RequireTokenAndRole("Administrador", "Empresa").DisableAntiforgery();
+
+            group.MapEndpoint<ResponseDTO>(
+                HttpMethodType.Post,
+                "generarDifusion",
+                "GenerarDifusion",
+                async (
+                    int IdEleccion,
+                    DifusionHandler handler,
+                    CancellationToken cancellationToken) =>
+                {
+                    var response = await handler.CreateAsync(IdEleccion, cancellationToken).ConfigureAwait(false);
+
+                    if (!response.Success)
+                    {
+                        return Results.BadRequest(response);
+                    }
+                    return Results.Ok(response);
+                },
+                    new EndpointOptions { RequireValidation = false, NotRequiredCompania = true }
+
+                ).RequireTokenAndRole("Administrador", "Empresa");
 
             return group;
         }

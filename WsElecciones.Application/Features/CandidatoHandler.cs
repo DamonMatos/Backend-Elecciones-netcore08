@@ -46,20 +46,6 @@ namespace WsElecciones.Application.Features
                    : $"{baseUrl}/{item.IdEleccion}/{item.IdProceso}/{item.UrlFile}"
            }).ToArray();
 
-            //var items = result.Items
-            //.Select(item => new GetCandidatosDTO.CandidatoItemDto(
-            //    item.IdEleccion,
-            //    item.IdProceso,
-            //    item.IdCandidato,
-            //    item.TipoDocumento,
-            //    item.NumeroDocumento,
-            //    item.NombreCompleto,
-            //    item.Area,
-            //    item.Localidad,
-            //    item.UrlFile,
-            //    item.Estado,
-            //    item.Descripcion
-            //    )).ToArray();
 
             var responseData = new GetCandidatosDTO.CandidatoPagedResponse(
             items,
@@ -70,13 +56,6 @@ namespace WsElecciones.Application.Features
             return Response<GetCandidatosDTO.CandidatoPagedResponse>.Ok(responseData);
         }
 
-        //private static string BuildFileUrl(string baseUrl, int idEleccion, int idProceso, string urlFile)
-        //{
-        //    if (string.IsNullOrWhiteSpace(urlFile))
-        //        return string.Empty;
-
-        //    return $"{baseUrl}/{idEleccion}/{idProceso}/{urlFile.TrimStart('/')}";
-        //}
 
         public async Task<Response<ResponseDTO>> AddCandidatoAsync(CreateCandidatoDTO request, CancellationToken cancellationToken= default)
         {
@@ -92,20 +71,22 @@ namespace WsElecciones.Application.Features
             if (result.Estado == 0)
                 return Response<ResponseDTO>.Failure(result.Mensaje ?? "Error al guardar la colaborador.", Array.Empty<string>());
 
-            //Logica para guardar la imagen
             if (accion != 3) {
-                foto = request.Foto.FileName;
-                filename = request.UrlFile;
-                if (request.UrlFile is not null) {
-                    var extension = Path.GetExtension(foto).ToLowerInvariant();
-                    if (extension != ".jpg")
+                if (request.Foto is not null) {
+                    foto = request.Foto.FileName;
+                    filename = request.UrlFile;
+                    if (request.UrlFile is not null)
                     {
-                        return Response<ResponseDTO>.Failure("Solo se permiten archivos .JPG", Array.Empty<string>());
+                        var extension = Path.GetExtension(foto).ToLowerInvariant();
+                        if (extension != ".jpg")
+                        {
+                            return Response<ResponseDTO>.Failure("Solo se permiten archivos .JPG o JPEG", Array.Empty<string>());
+                        }
+                        modulo = "Elecciones";
+                        foldername = string.Format("{0}/{1}", request.IdEleccion, request.IdProceso);
+                        await fileStorage.SaveAsync(modulo, foldername, filename, request.Foto, cancellationToken);
                     }
-                    modulo = "Elecciones";
-                    foldername = string.Format("{0}/{1}", request.IdEleccion, request.IdProceso);
-                    fileStorage.SaveAsync(modulo,foldername,filename, request.Foto, cancellationToken);
-                }
+                }         
             }
 
             var response = new ResponseDTO(result.Id, result.Estado, result.Mensaje);

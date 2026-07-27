@@ -32,5 +32,11 @@ namespace WsElecciones.Domain.Views.Colaboradores
             int Limit
             );
 
+        public sealed record ColaboradoresEnvioMasivoCorreo(
+            string Correo,
+            string? Clave,
+            string NombrePerfil
+            );
+
     }
 }

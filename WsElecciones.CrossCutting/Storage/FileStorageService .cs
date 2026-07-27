@@ -13,22 +13,17 @@ namespace WsElecciones.CrossCutting.Storage
 {
     public class FileStorageService : IFileStorageService
     {
-        //private readonly string _sharedPath;
-        private readonly IOptions<FileStorageConfig> _strageOptions;
-        //private readonly string _baseUrl;
+        private readonly IOptions<FileStorageConfig> _storageOptions;
         private readonly ILogger<FileStorageService> _logger;
-       // private static readonly HashSet<string> AllowedExtensions = new(StringComparer.OrdinalIgnoreCase) { ".png",".jpg" };
-       // private const long MaxFileSizeBytes = 2 * 1024 * 1024;
-
         public FileStorageService(IOptions<FileStorageConfig> storageOptions, ILogger<FileStorageService> logger)
         {
             _logger = logger;
-            _strageOptions = storageOptions;  
+            _storageOptions = storageOptions;  
         }
 
-        public void CreateCarpeta(string foldername,string idEleccion,string idProceso) 
+        public async Task CreateCarpeta(string foldername,string idEleccion,string idProceso) 
         {
-            var storage = _strageOptions.Value.Modules[foldername];
+            var storage = _storageOptions.Value.Modules[foldername];
             var _sharedPath = storage.SharedPath;
             String Ruta = String.Format("{0}//{1}//{2}", _sharedPath.ToString(),idEleccion,idProceso);
             if(!Directory.Exists(Ruta)) 
@@ -37,9 +32,9 @@ namespace WsElecciones.CrossCutting.Storage
             }        
         }
 
-        public void DeleteCarpeta(string foldername, string idEleccion, string idProceso)
+        public async Task DeleteCarpeta(string foldername, string idEleccion, string idProceso)
         {
-            var storage = _strageOptions.Value.Modules[foldername];
+            var storage = _storageOptions.Value.Modules[foldername];
             var _sharedPath = storage.SharedPath;
             String Ruta = String.Format("{0}//{1}//{2}", _sharedPath.ToString(), idEleccion, idProceso);
             if (Directory.Exists(Ruta))
@@ -48,31 +43,17 @@ namespace WsElecciones.CrossCutting.Storage
             }
         }
 
-        public async void SaveAsync(string module, string foldername, string fileName, IFormFile fileStream, CancellationToken cancellationToken = default)
+        public async Task SaveAsync(string module, string foldername, string fileName, IFormFile fileStream, CancellationToken cancellationToken = default)
         {
-            var storage = _strageOptions.Value.Modules[module];
+            var storage = _storageOptions.Value.Modules[module];
             var _sharedPath = storage.SharedPath;
 
-            //var subFolder = Path.GetFileNameWithoutExtension(fileName); 
-            //var folderPath = Path.Combine(_sharedPath, subFolder);
             var folderPath = Path.Combine(_sharedPath, foldername);
 
-            //Crear la carpeta
             if (!Directory.Exists(folderPath))
                 Directory.CreateDirectory(folderPath);
 
-            //Crear el Archivo File 
             var fullPath = Path.Combine(folderPath, fileName);
-
-            using var memoryStream = new MemoryStream();
-            await using (var inputStream = fileStream.OpenReadStream())
-            {
-                if (inputStream.CanSeek)
-                    inputStream.Seek(0, SeekOrigin.Begin);
-
-                await inputStream.CopyToAsync(memoryStream, cancellationToken);
-            }
-            memoryStream.Seek(0, SeekOrigin.Begin);
 
             await using var fileOutput = new FileStream(
                 fullPath,
@@ -82,10 +63,7 @@ namespace WsElecciones.CrossCutting.Storage
                 bufferSize: 4096,
                 useAsync: true);
 
-            await memoryStream.CopyToAsync(fileOutput, cancellationToken);
-            await fileOutput.FlushAsync(cancellationToken);
-
-            _logger.LogInformation("Foto guardada en ruta compartida: {Path}", fullPath);
+            await fileStream.CopyToAsync(fileOutput, cancellationToken);
         }
 
         //public Task DeleteAsync(string relativePath, CancellationToken cancellationToken = default)

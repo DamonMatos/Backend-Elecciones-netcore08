@@ -5,6 +5,7 @@ using WsElecciones.Application.DTOs;
 using WsElecciones.Application.DTOs.Auth;
 using WsElecciones.Application.Enums;
 using WsElecciones.CrossCutting;
+using WsElecciones.CrossCutting.Service;
 using WsElecciones.CrossCutting.Storage;
 using WsElecciones.Domain;
 using WsElecciones.Domain.Entities;
@@ -14,7 +15,11 @@ using UserDto = WsElecciones.Domain.Views.Auth.UserDto;
 
 namespace WsElecciones.Application.Features
 {
-    public class UserHandler(IMapper mapper, IUnitOfWork unitOfWork, IJwtTokenService jwtTokenService, IFileStorageService fileStorage, IOptions<FileStorageConfig> storageOptions)// IConfiguration config)
+    public class UserHandler(IMapper mapper, 
+                             IUnitOfWork unitOfWork, 
+                             IJwtTokenService jwtTokenService, 
+                             IFileStorageService fileStorage, 
+                             IUserPhotoService userPhotoService)
     {
         private static readonly HashSet<string> AllowedPublicRoles = new(StringComparer.OrdinalIgnoreCase)
         {
@@ -52,11 +57,7 @@ namespace WsElecciones.Application.Features
 
             var (token, expiry) = jwtTokenService.GenerateToken(usuario);
 
-            var storage = storageOptions.Value.Modules["Personal"];
-            var baseUrl = storage.BaseUrl;
-
-            //var baseUrl = config["FileStorage:BaseUrl"]!;
-            var fotUrl = string.IsNullOrWhiteSpace(usuario.FotPer) ? $"{baseUrl}/user-default.png" : $"{baseUrl}/{usuario.NumDocPer.Trim()}/{usuario.FotPer}";
+            var fotUrl = userPhotoService.GetPhotoUrl(usuario.FotPer, usuario.NumDocPer);
 
             var user = new DTOs.Auth.UserDto(
                 usuario.IdUsuario,
@@ -74,19 +75,7 @@ namespace WsElecciones.Application.Features
                 string.Empty
             );
 
-            var menu = authView.Menu
-            .Select(item => new DTOs.Auth.MenuDto(
-                item.IdPerfil,
-                item.Perfil,
-                item.IdMenu,
-                item.Menu,
-                item.IdSubMenu,
-                item.NomVista,
-                item.NomUrl,
-                item.Icono,
-                item.Tipo,
-                item.Cantidad))
-            .ToArray();
+            var menu = mapper.Map<IReadOnlyCollection<DTOs.Auth.MenuDto>>(authView.Menu);
 
             var responseData = new LoginResponseDTO(
             token,
@@ -100,7 +89,7 @@ namespace WsElecciones.Application.Features
 
         public async Task<Response<ResponseDTO>> UpdateAsync(UpdateRequestDTO request, CancellationToken cancellationToken)
         {
-            string foldername = string.Empty;
+            string? foldername = string.Empty;
             string modulo = string.Empty;   
             if (request.Foto is not null)
             {

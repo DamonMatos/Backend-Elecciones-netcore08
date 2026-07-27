@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using WsElecciones.Application.DTOs.Auth;
 using WsElecciones.CrossCutting;
+using WsElecciones.CrossCutting.Service;
 using WsElecciones.CrossCutting.Storage;
 using WsElecciones.Domain;
 using WsElecciones.Domain.Interface;
@@ -12,7 +13,11 @@ using UserDto = WsElecciones.Domain.Views.Auth.UserDto;
 
 namespace WsElecciones.Application.Features
 {
-    public class LoginHandler(IMapper mapper,IUnitOfWork unitOfWork, IJwtTokenService jwtTokenService, IOptions<FileStorageConfig> storageOptions)//, IConfiguration config)
+    public class LoginHandler(IMapper mapper,
+                              IUnitOfWork unitOfWork, 
+                              IJwtTokenService jwtTokenService, 
+                              IUserPhotoService userPhotoService
+                              )
     {
         public async Task<Response<LoginResponseDTO>> LoginAsync(LoginRequestDTO request, CancellationToken cancellationToken= default)
         {
@@ -27,11 +32,11 @@ namespace WsElecciones.Application.Features
             if (!BCrypt.Net.BCrypt.Verify(request.Clave, usuario.ClaveHash))
                 return Response<LoginResponseDTO>.Failure("Credenciales inválidas.",Array.Empty<string>());
 
-            var storage = storageOptions.Value.Modules["Personal"];
-            var baseUrl = storage.BaseUrl;
+            //var storage = storageOptions.Value.Modules["Personal"];
+            //var baseUrl = storage.BaseUrl;
 
-            //var baseUrl = config["FileStorage:BaseUrl"]!;
-            var fotUrl = string.IsNullOrWhiteSpace(usuario.FotPer)? $"{baseUrl}/user-default.png": $"{baseUrl}/{usuario.NumDocPer.Trim()}/{usuario.FotPer}";
+            //var fotUrl = string.IsNullOrWhiteSpace(usuario.FotPer)? $"{baseUrl}/user-default.png": $"{baseUrl}/{usuario.NumDocPer.Trim()}/{usuario.FotPer}";
+            var fotUrl = userPhotoService.GetPhotoUrl(usuario.FotPer, usuario.NumDocPer);
 
             var user = new DTOs.Auth.UserDto(
                 usuario.IdUsuario,

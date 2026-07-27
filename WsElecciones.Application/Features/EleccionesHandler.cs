@@ -50,7 +50,7 @@ namespace WsElecciones.Application.Features
 
         }
 
-        public async Task<Response<EleccionesDTO>> GetById(int IdCliente, int IdEleccion, CancellationToken cancellationToken = default) 
+        public async Task<Response<EleccionesDTO>> GetByIdAsync(int IdCliente, int IdEleccion, CancellationToken cancellationToken = default) 
         {
             var result = await unitOfWork.EleccionesRepository.GetByIdAsync(IdCliente, IdEleccion, cancellationToken).ConfigureAwait(false);
 
@@ -116,7 +116,8 @@ namespace WsElecciones.Application.Features
                 return Response<ResponseDTO>.Failure(result.Mensaje ?? "Error al guardar la elección.",Array.Empty<string>());
       
             string filename = string.Empty;
-        
+            modulo = "Elecciones";
+
             if (request.Logo is not null)
             {
                 var extension = Path.GetExtension(request.Logo.FileName).ToLowerInvariant();
@@ -126,31 +127,23 @@ namespace WsElecciones.Application.Features
                 }
                 
                 filename = result.Id.ToString() + extension.Trim();
-                modulo = "Elecciones";
-                fileStorage.SaveAsync(modulo, result.Id.ToString(), filename, request.Logo, cancellationToken);
+                
+                await fileStorage.SaveAsync(modulo, result.Id.ToString(), filename, request.Logo, cancellationToken);
             }
 
             //Metodo para crear Carpetas de Proceso
             var ListaProceso = await unitOfWork.EleccionesRepository.GetAllProcesoAsync(result.Id, cancellationToken);
+
             if (ListaProceso.Count > 0) {
                 foreach (var idProceso in ListaProceso)
                 {
-                    fileStorage.CreateCarpeta(modulo, result.Id.ToString(), idProceso.ToString());
+                   await fileStorage.CreateCarpeta(modulo, result.Id.ToString(), idProceso.ToString());
                 }
             }
            
             var response = new ResponseDTO(result.Id, result.Estado, result.Mensaje);
             return Response<ResponseDTO>.Ok(response);
-        }
+        }      
 
-        public async Task<Response<ResponseDTO>> DeleteProceso(int IdEleccion, int IdProceso, CancellationToken cancellationToken = default) { 
-          var result = await unitOfWork.EleccionesRepository.DeleteProceso(IdEleccion, IdProceso, cancellationToken);
-            if (result.Estado == 0) {
-                return Response<ResponseDTO>.Failure(result.Mensaje ?? "Error al eliminar el proceso.", Array.Empty<string>());
-            }
-
-            var response = new ResponseDTO(result.Id, result.Estado, result.Mensaje);
-            return Response<ResponseDTO>.Ok(response);  
-        }
     }
 }

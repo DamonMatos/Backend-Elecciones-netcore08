@@ -29,7 +29,8 @@ namespace WsElecciones.Persistence.Repository
         public const string Sp_GetByIdEleccion = "up_Get_EleccionesById_v01";
         public const string Sp_DeleteProceso = "up_delete_ProcesoById_v01";
         public const string Sp_GetProceso = "up_Get_Proceso";
-
+        public const string Sp_GenerarDifusion = "Usp_GenerarDifusionSSMA";
+        
 
         public async Task<ResponseView> CreateAsync(CreateEleccionesView request, CancellationToken cancellationToken = default)
         {
@@ -61,6 +62,28 @@ namespace WsElecciones.Persistence.Repository
 
             await spExecutor.ExecuteNonQueryAsync(
                 Sp_DeleteProceso,
+                parameters,
+                cancellationToken);
+
+            return new ResponseView(
+                Id: SqlParameterFactory.GetOutputValue<int>(parameters, "@Id", 0),
+                Estado: SqlParameterFactory.GetOutputValue<int>(parameters, "@Estado", 0),
+                Mensaje: SqlParameterFactory.GetOutputValue<string>(parameters, "@Mensaje", string.Empty)
+            );
+        }
+
+        public async Task<ResponseView> GenerarDifusion(int IdEleccion, CancellationToken cancellationToken = default)
+        {
+            var parameters = new[]
+            {
+                SqlParameterFactory.CreateInt("@IdEleccion", IdEleccion),
+                SqlParameterFactory.CreateOutput("@Id", SqlDbType.Int),
+                SqlParameterFactory.CreateOutput("@Estado", SqlDbType.Int),
+                SqlParameterFactory.CreateOutput("@Mensaje", SqlDbType.VarChar,250),
+            };
+
+            await spExecutor.ExecuteNonQueryAsync(
+                Sp_GenerarDifusion,
                 parameters,
                 cancellationToken);
 
