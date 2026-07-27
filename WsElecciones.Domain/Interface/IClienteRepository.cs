@@ -5,8 +5,9 @@ namespace WsElecciones.Domain.Interface
 {
     public interface IClienteRepository
     {
-        public Task<IReadOnlyCollection<ClienteView>> GetAsync(int id, CancellationToken cancellationToken = default);
-        public Task<ClienteView> GetByIdAsync(int id, CancellationToken cancellationToken = default);
+        //Este metodo falta incluir SP y EndPoint
+        public Task<IReadOnlyCollection<ClienteView>> GetAsync(int idPersonal, CancellationToken cancellationToken = default);
+        public Task<ClienteView> GetByIdAsync(int idPersonal, CancellationToken cancellationToken = default);
 
     }
 }

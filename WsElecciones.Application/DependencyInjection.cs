@@ -19,6 +19,8 @@ public static class DependencyInjection
         services.AddScoped<UserHandler>();
         services.AddScoped<EleccionesHandler>();
         services.AddScoped<ClienteHandler>();
+        services.AddScoped<SelectItemHandler>();
+        services.AddScoped<VotanteHandler>();
         services.AddValidatorsFromAssemblyContaining<CreatePagoAsbancValidator>();
 
         return services;

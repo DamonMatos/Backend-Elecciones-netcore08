@@ -12,8 +12,7 @@ namespace WsElecciones.Persistence;
 
 public static class DependencyInjection
 {
-    private static readonly ILoggerFactory loggerFactory = new LoggerFactory(new[] { new DebugLoggerProvider() });
-
+    private static readonly ILoggerFactory loggerFactory = new LoggerFactory(new[] { new DebugLoggerProvider() });    
     public static IServiceCollection AddInfraestructureService(this IServiceCollection services,
         IConfiguration configuration)
     {
@@ -32,7 +31,10 @@ public static class DependencyInjection
         services.AddTransient<IClienteRepository, ClienteRepository>();
         services.AddTransient<IEleccionesRepository, EleccionesRepository>();
         services.AddTransient<IAuthRepository, AuthRepository>();
-
+        services.AddTransient<ISelectItemRepository, SelectRepository>();
+        services.AddTransient<IColaboradorRepository, ColaboradorRepository>();
+        services.AddTransient<ICandidatoRepository, CandidatoRepository>();
+        services.AddTransient<IVotanteRepository, VotanteRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         return services;
     }

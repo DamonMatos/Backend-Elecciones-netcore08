@@ -76,7 +76,8 @@ public static class ProgramacionCuentaCorrienteEndpoint
 
         group.MapEndpoint<GetProgramacionCuentaCorrienteByIdDTO.ProgramacionCuentaCorrienteDetailResponse>(
             HttpMethodType.Get,
-            "{id:int}", "ObtenerProgramacionCuentaCorrientePorId", async (
+            "{id:int}", 
+            "ObtenerProgramacionCuentaCorrientePorId", async (
                 int id,
                 ProgramacionCuentaCorrienteHandler handler,
                 CancellationToken cancellationToken) =>

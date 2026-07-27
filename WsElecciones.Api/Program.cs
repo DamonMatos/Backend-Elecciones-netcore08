@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using System.Diagnostics;
@@ -10,6 +11,7 @@ using WsElecciones.Application;
 using WsElecciones.Application.Features;
 using WsElecciones.CrossCutting;
 using WsElecciones.CrossCutting.Security;
+using WsElecciones.CrossCutting.Service;
 using WsElecciones.CrossCutting.Storage;
 using WsElecciones.Domain.Interface;
 using WsElecciones.Persistence;
@@ -69,16 +71,27 @@ builder.Services.AddAuthorization(options =>
 
 });
 
+builder.Services.Configure<FileStorageConfig>(
+    builder.Configuration.GetSection("FileStorage")
+);
 
 // ── INYECCIÓN DE DEPENDENCIAS — AUTH ────────────────────────────────────────
 
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<IFileStorageService, FileStorageService>();
+builder.Services.AddScoped<IUserPhotoService, UserPhotoService>();
 builder.Services.AddScoped<LoginHandler>();
 builder.Services.AddScoped<UserHandler>();
 builder.Services.AddScoped<EleccionesHandler>();
 builder.Services.AddScoped<ClienteHandler>();
+builder.Services.AddScoped<SelectItemHandler>();
+builder.Services.AddScoped<ColaboradorHandler>();
+builder.Services.AddScoped<ProcesoHandler>();
+builder.Services.AddScoped<DifusionHandler>();
+builder.Services.AddScoped<VotanteHandler>();
+builder.Services.AddScoped<CandidatoHandler>();
+
 //builder.Services.AddEndpointsApiExplorer();
 //builder.Services.AddSwaggerGen();
 builder.Services.AddSwaggerWithBearer();
@@ -135,17 +148,27 @@ app.UseCors(corsPolicyName);
 
 app.UseAuthentication(); 
 app.UseAuthorization();
-
 app.UseMiddleware<HttpRequestMiddleware>();
 app.UseMiddleware<ExceptionMiddleware>();
 app.MapAuthEndpoints();
-
 app.MapEleccionesEndpoints();
 app.MapUserEndpoints();
 app.MapPagoIntegracionesEndpoints();
 app.MapPagoEndpoints();
 app.MapClienteEndpoints();
+app.MapCatalogoEndpoints();
+app.MapColaboradorEndpoints();
+app.MapCandidatoEndpoints();
+app.MapVotanteEndpoints();
 app.MapProgramacionCuentaCorrienteEndpoints();
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+        "C:\\SistemasWeb\\Elecciones\\Archivos"),
+    RequestPath = "/fotos"
+});
+
 try
 {
     Log.Logger = LogginConfiguration.AddLoggerConfiguration(app);

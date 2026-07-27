@@ -20,11 +20,11 @@ namespace WsElecciones.Persistence.Repository
     {
         public const string Sp_GetCliente = "";
         public const string Sp_GetByIdCliente = "up_get_Users_Cliente_v01";
-        public async Task<IReadOnlyCollection<ClienteView>> GetAsync(int id, CancellationToken cancellationToken = default)
+        public async Task<IReadOnlyCollection<ClienteView>> GetAsync(int idPersonal, CancellationToken cancellationToken = default)
         {
             var parameters = new[]
             {
-                SqlParameterFactory.CreateInt("@IdPersonal", id)
+                SqlParameterFactory.CreateInt("@IdPersonal", idPersonal)
             };
 
             var result = await spExecutor.ExecuteReaderAsync(
@@ -43,11 +43,11 @@ namespace WsElecciones.Persistence.Repository
             return result;
         }
 
-        public async Task<ClienteView> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+        public async Task<ClienteView> GetByIdAsync(int idPersonal, CancellationToken cancellationToken = default)
         {
             var parameters = new[]
             {
-                SqlParameterFactory.CreateInt("@IdPersonal", id)
+                SqlParameterFactory.CreateInt("@IdPersonal", idPersonal)
             };
 
             var result = await spExecutor.ExecuteReaderAsync(
