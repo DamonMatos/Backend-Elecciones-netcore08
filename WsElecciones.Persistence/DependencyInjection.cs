@@ -35,6 +35,7 @@ public static class DependencyInjection
         services.AddTransient<IColaboradorRepository, ColaboradorRepository>();
         services.AddTransient<ICandidatoRepository, CandidatoRepository>();
         services.AddTransient<IVotanteRepository, VotanteRepository>();
+        services.AddTransient<IElectorRepository, ElectorRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         return services;
     }

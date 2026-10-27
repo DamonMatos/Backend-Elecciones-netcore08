@@ -20,6 +20,7 @@ public class UnitOfWork : IUnitOfWork
     public ICandidatoRepository CandidatoRepository { get; }
     public IColaboradorRepository ColaboradorRepository { get; }
     public IVotanteRepository VotanteRepository { get; }
+    public IElectorRepository ElectorRepository { get; }
 
     private readonly CuentaCorrienteContext _context;
 
@@ -46,7 +47,8 @@ public class UnitOfWork : IUnitOfWork
         ISelectItemRepository selectItemRepository,
         ICandidatoRepository candidatoRepository,
         IColaboradorRepository colaboradorRepository,
-        IVotanteRepository votanteRepository
+        IVotanteRepository votanteRepository,
+        IElectorRepository electorRepository
     )
     {
         this._context = _context ?? throw new ArgumentNullException(nameof(_context));
@@ -63,6 +65,7 @@ public class UnitOfWork : IUnitOfWork
         CandidatoRepository = candidatoRepository;
         ColaboradorRepository = colaboradorRepository;
         VotanteRepository = votanteRepository;
+        ElectorRepository = electorRepository;
 
     }
 }

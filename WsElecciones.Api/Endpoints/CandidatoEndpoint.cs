@@ -55,7 +55,8 @@ namespace WsElecciones.Api.Endpoints
                     CandidatoHandler handler,
                     CancellationToken cancellationToken
                     ) => {
-                        var response = await handler.AddCandidatoAsync(request, cancellationToken).ConfigureAwait(false);
+                        var response = await handler.AddCandidatoAsync(request, cancellationToken)
+                        .ConfigureAwait(false);
 
                         if (!response.Success)
                         {
