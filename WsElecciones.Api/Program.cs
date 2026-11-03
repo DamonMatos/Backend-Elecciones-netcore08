@@ -91,6 +91,7 @@ builder.Services.AddScoped<ProcesoHandler>();
 builder.Services.AddScoped<DifusionHandler>();
 builder.Services.AddScoped<VotanteHandler>();
 builder.Services.AddScoped<CandidatoHandler>();
+builder.Services.AddScoped<ElectorHandler>();
 
 //builder.Services.AddEndpointsApiExplorer();
 //builder.Services.AddSwaggerGen();
@@ -165,7 +166,7 @@ app.MapProgramacionCuentaCorrienteEndpoints();
 app.UseStaticFiles(new StaticFileOptions
 {
     FileProvider = new PhysicalFileProvider(
-        "C:\\SistemasWeb\\Elecciones\\Archivos"),
+        "C:\\Proyectos\\SistemasWeb\\Elecciones\\Archivos"),
     RequestPath = "/fotos"
 });
 

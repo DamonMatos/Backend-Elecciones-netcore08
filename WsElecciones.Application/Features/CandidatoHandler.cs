@@ -8,13 +8,14 @@ using WsElecciones.CrossCutting.Storage;
 using WsElecciones.Domain;
 using WsElecciones.Domain.Interface;
 using WsElecciones.Domain.Views.Candidatos;
-using static WsElecciones.Application.DTOs.Candidatos.GetCandidatosDTO;
 
 namespace WsElecciones.Application.Features
 {
     public class CandidatoHandler(IUnitOfWork unitOfWork, IMapper mapper, IFileStorageService fileStorage, IOptions<FileStorageConfig> storageOptions)
     {
-        public async Task<Response<GetCandidatosDTO.CandidatoPagedResponse>> GetCandidatoAsync(int page,int limit,int idEleccion,int idProceso, CancellationToken cancellationToken = default) {
+        public async Task<Response<GetCandidatosDTO.CandidatoPagedResponse>> GetCandidatoAsync
+            (int page,int limit,int idEleccion,int idProceso, 
+            CancellationToken cancellationToken = default) {
             var result = await unitOfWork.CandidatoRepository.GetCandidatosAsync(
                 page,
                 limit,

@@ -17,5 +17,6 @@ public interface IUnitOfWork
     IColaboradorRepository ColaboradorRepository { get; }
     ISelectItemRepository SelectItemRepository { get; }
     IVotanteRepository VotanteRepository { get; }
+    IElectorRepository ElectorRepository { get; }
     IDbTransaction BeginTransaction();
 }
