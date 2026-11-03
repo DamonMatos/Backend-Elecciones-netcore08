@@ -1,71 +1,70 @@
 ﻿using MapsterMapper;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using WsElecciones.Application.DTOs.Auth;
 using WsElecciones.CrossCutting;
+using WsElecciones.CrossCutting.Service;
+using WsElecciones.CrossCutting.Storage;
 using WsElecciones.Domain;
 using WsElecciones.Domain.Interface;
 using WsElecciones.Domain.Views.Auth;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 using UserDto = WsElecciones.Domain.Views.Auth.UserDto;
 
 namespace WsElecciones.Application.Features
 {
-    public class LoginHandler(IMapper mapper,IUnitOfWork unitOfWork, IJwtTokenService jwtTokenService)
+    public class LoginHandler(IMapper mapper,
+                              IUnitOfWork unitOfWork, 
+                              IJwtTokenService jwtTokenService, 
+                              IUserPhotoService userPhotoService
+                              )
     {
         public async Task<Response<LoginResponseDTO>> LoginAsync(LoginRequestDTO request, CancellationToken cancellationToken= default)
         {
-            var login = await unitOfWork.AuthRepository.GetByUsernameAsync(request.Correo.Trim().ToLowerInvariant(),cancellationToken)
+            var login = await unitOfWork.AuthRepository.GetByEmailAsync(request.Correo.Trim().ToLowerInvariant(), cancellationToken)
                 .ConfigureAwait(false);
 
-            String claveHash = String.Empty;
+            var usuario = login.User;
 
-            var usuarios = login.User.Select(item => new DTOs.Auth.UserDto(
-                item.IdUsuario,
-                item.IdPersonal,
-                item.ApePatPer,
-                item.ApeMatPer,
-                item.NomPer,
-                item.TipDocPer,
-                item.NumDocPer,
-                item.FehNacPer,
-                item.FotPer,
-                item.IdPerfil,
-                item.Perfil,
-                item.Correo,
-                item.ClaveHash))
-            .ToArray();
-
-            var usuario = usuarios[0];
-
-            claveHash = usuario.ClaveHash;
-
-            if (login.User is null || !BCrypt.Net.BCrypt.Verify(request.Clave, claveHash))
-            {
+            if (usuario is null)
                 return Response<LoginResponseDTO>.Failure("Credenciales inválidas.", Array.Empty<string>());
-            }
 
-            var (token, expiry) = jwtTokenService.GenerateToken(mapper.Map<UserDto>(usuario));
+            if (!BCrypt.Net.BCrypt.Verify(request.Clave, usuario.ClaveHash))
+                return Response<LoginResponseDTO>.Failure("Credenciales inválidas.",Array.Empty<string>());
 
-            var menu = login.Menu
-            .Select(item => new DTOs.Auth.MenuDto(
-                item.IdPerfil,
-                item.Perfil,
-                item.IdMenu,
-                item.Menu,
-                item.IdSubMenu,
-                item.NomVista,
-                item.NomUrl,
-                item.Icono,
-                item.Tipo,
-                item.Cantidad))
-            .ToArray();
+            //var storage = storageOptions.Value.Modules["Personal"];
+            //var baseUrl = storage.BaseUrl;
 
-            var responseData = new LoginResponseDTO(
+            //var fotUrl = string.IsNullOrWhiteSpace(usuario.FotPer)? $"{baseUrl}/user-default.png": $"{baseUrl}/{usuario.NumDocPer.Trim()}/{usuario.FotPer}";
+            var fotUrl = userPhotoService.GetPhotoUrl(usuario.FotPer, usuario.NumDocPer);
+
+            var user = new DTOs.Auth.UserDto(
+                usuario.IdUsuario,
+                usuario.IdPersonal,
+                usuario.ApePatPer,
+                usuario.ApeMatPer,
+                usuario.NomPer,
+                usuario.TipDocPer,
+                usuario.NumDocPer,
+                usuario.FehNacPer,
+                fotUrl,
+                usuario.IdPerfil,
+                usuario.Perfil,
+                usuario.Correo,
+                string.Empty
+            );
+
+            var (token, expiry) = jwtTokenService.GenerateToken(mapper.Map<UserDto>(user));
+
+            var menu = mapper.Map<IReadOnlyCollection<DTOs.Auth.MenuDto>>(login.Menu);
+
+            var response = new LoginResponseDTO(
             token,
             expiry,
-            usuarios,
+            user,
             menu);
 
-            return Response<LoginResponseDTO>.Ok(responseData);
-
+            return Response<LoginResponseDTO>.Ok(response);
         }
     }
 }

@@ -9,7 +9,7 @@ namespace WsElecciones.Application.DTOs.Auth;
 public sealed record LoginResponseDTO(
     string? Token,
     DateTime? Expiry,
-    IReadOnlyCollection<UserDto> User,
+    UserDto User,
     IReadOnlyCollection<MenuDto> Menu
     );
 

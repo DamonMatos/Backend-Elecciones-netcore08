@@ -31,3 +31,9 @@ public sealed record EleccionesPagedResponseDTO(
     int Page,
     int Limit
     );
+
+public sealed record EleccionesDTO(
+    EleccionesResponseDTO Eleccion,
+    IReadOnlyCollection<ProcesoResponseDTO> Procesos
+    );
+

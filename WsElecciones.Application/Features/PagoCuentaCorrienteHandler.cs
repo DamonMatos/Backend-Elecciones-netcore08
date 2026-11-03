@@ -20,9 +20,7 @@ namespace WsElecciones.Application.Features
         }
         public async Task<Response<CreatePagoAsbancDTO.PagoAsbancDTO>> CrearPagoAsbancAsync(CreatePagoAsbancDTO.CreatePagoAsbancRequestDTO request)
         {
-            int numOperacionERP = await _unitOfWork.PagoAsbancRepository.Add(
-                _mapper.Map<PagoAsbanc>(request)
-            );
+            int numOperacionERP = await _unitOfWork.PagoAsbancRepository.Add(_mapper.Map<PagoAsbanc>(request));
             var pagoAsbancDTO = new CreatePagoAsbancDTO.PagoAsbancDTO(numOperacionERP, string.Empty);
             return Response<CreatePagoAsbancDTO.PagoAsbancDTO>.Ok(pagoAsbancDTO);
         }

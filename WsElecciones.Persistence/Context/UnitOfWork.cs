@@ -16,6 +16,11 @@ public class UnitOfWork : IUnitOfWork
     public IAuthRepository AuthRepository { get; }
     public IEleccionesRepository EleccionesRepository { get; }
     public IClienteRepository ClienteRepository { get; }
+    public ISelectItemRepository SelectItemRepository { get; }
+    public ICandidatoRepository CandidatoRepository { get; }
+    public IColaboradorRepository ColaboradorRepository { get; }
+    public IVotanteRepository VotanteRepository { get; }
+    public IElectorRepository ElectorRepository { get; }
 
     private readonly CuentaCorrienteContext _context;
 
@@ -38,7 +43,12 @@ public class UnitOfWork : IUnitOfWork
         IPagoRepository pagoRepository,
         IAuthRepository authRepository,
         IEleccionesRepository eleccionesRepository,
-        IClienteRepository clienteRepository
+        IClienteRepository clienteRepository,
+        ISelectItemRepository selectItemRepository,
+        ICandidatoRepository candidatoRepository,
+        IColaboradorRepository colaboradorRepository,
+        IVotanteRepository votanteRepository,
+        IElectorRepository electorRepository
     )
     {
         this._context = _context ?? throw new ArgumentNullException(nameof(_context));
@@ -51,5 +61,11 @@ public class UnitOfWork : IUnitOfWork
         AuthRepository = authRepository;
         EleccionesRepository = eleccionesRepository;
         ClienteRepository = clienteRepository;
+        SelectItemRepository = selectItemRepository;
+        CandidatoRepository = candidatoRepository;
+        ColaboradorRepository = colaboradorRepository;
+        VotanteRepository = votanteRepository;
+        ElectorRepository = electorRepository;
+
     }
 }

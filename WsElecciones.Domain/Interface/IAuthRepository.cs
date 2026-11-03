@@ -11,8 +11,11 @@ namespace WsElecciones.Domain.Interface
 {
     public interface IAuthRepository
     {
-        Task<GetAuthView> GetByUsernameAsync(string correo, CancellationToken cancellationToken = default);
-        Task<IReadOnlyCollection<ResponseView>> RegistrarUserAsysc(string username, string claveHash, string perfil,CancellationToken cancellationToken = default);
-        Task<IReadOnlyCollection<ResponseView>> UpdateUserAsysc(UpdateUserView request, CancellationToken cancellationToken = default);
+        Task<GetAuthView> GetByEmailAsync(string correo, CancellationToken cancellationToken = default);
+        Task<ResponseView> CreateAsync(string correo, string claveHash, string perfil,CancellationToken cancellationToken = default);
+        Task<ResponseView> UpdateAsync(UpdateUserView request, CancellationToken cancellationToken = default);
+
+       // Task<ResponseView> UpdateAsync(UpdateUserView request, CancellationToken cancellationToken = default);
+
     }
 }

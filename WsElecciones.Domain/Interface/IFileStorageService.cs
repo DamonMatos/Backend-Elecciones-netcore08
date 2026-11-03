@@ -8,7 +8,9 @@ namespace WsElecciones.Domain.Interface
 {
     public interface IFileStorageService
     {
-        void SaveAsync(IFormFile fileStream, string foldername, string fileName, CancellationToken cancellationToken = default);
-       // Task DeleteAsync(string relativePath, CancellationToken cancellationToken = default);
+        Task SaveAsync(string module, string? foldername, string fileName, IFormFile fileStream, CancellationToken cancellationToken = default);
+        Task CreateCarpeta(string foldername, string idEleccion, string idProceso);
+        Task DeleteCarpeta(string foldername, string idEleccion, string idProceso);
+
     }
 }

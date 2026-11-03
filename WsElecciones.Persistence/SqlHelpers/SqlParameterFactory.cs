@@ -66,6 +66,20 @@ namespace WsElecciones.Persistence.SqlHelpers
             param.Value = value;
             return param;
         }
+
+        public static T GetOutputValue<T>(SqlParameter[] parametros,string nombre,T defaultValue)
+        {
+            var value = parametros.FirstOrDefault(x => x.ParameterName == nombre)?.Value;
+
+            if (value is null or DBNull)
+                return defaultValue;
+
+            if (typeof(T) == typeof(string))
+                return (T)(object)value.ToString()!;
+
+            return (T)Convert.ChangeType(value, typeof(T));
+        }
+
         public static SqlParameter CreateStructured(string name, string typeName, DataTable value) =>
             new(name, value) { SqlDbType = SqlDbType.Structured, TypeName = typeName };
 

@@ -38,6 +38,7 @@ public class CuentaCorrienteRepository : Repository<CuentaCorriente>, ICuentaCor
                 SpGeneraCuentaCorriente,
                 parametros,
                 cancellationToken);
+
         var codCuentaCorriente = parametros.FirstOrDefault(x => x.ParameterName == "@pcod_cuenta_corriente")?.Value;
         var estado = parametros.FirstOrDefault(x => x.ParameterName == "@pestado")?.Value.ToString()!;
         var resultado = parametros.FirstOrDefault(x => x.ParameterName == "@presultado")?.Value?.ToString()!;
