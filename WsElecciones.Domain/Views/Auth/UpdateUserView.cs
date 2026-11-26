@@ -16,9 +16,9 @@ namespace WsElecciones.Domain.Views.Auth
         public DateTime? FechaNacimiento { get; set; }
         public string? TipoDocumento { get; set; }
         public string? NumeroDocumento { get; set; }
-        public string NombreFoto { get; set; }
+        public string? NombreFoto { get; set; }
         public string? NombreCliente { get; set; }
-        public string RazonSocial { get; set; }
-        public string Ruc { get; set; }
+        public string? RazonSocial { get; set; }
+        public string? Ruc { get; set; }
     }
 }

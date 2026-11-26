@@ -24,3 +24,8 @@ public sealed record EleccionesPagedResult(
     int TotalRegistros,
     int Page,
     int Limit) : PagedView <EleccionesView>(Items, TotalRegistros, Page, Limit);
+
+public sealed record EleccionView(
+    EleccionesView Eleccion,
+    IReadOnlyCollection<ProcesoView> Procesos
+    );

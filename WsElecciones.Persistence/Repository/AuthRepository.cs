@@ -2,16 +2,12 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using WsElecciones.CrossCutting.Helpers;
 using WsElecciones.Domain;
 using WsElecciones.Domain.Entities;
 using WsElecciones.Domain.Interface;
 using WsElecciones.Domain.Views;
 using WsElecciones.Domain.Views.Auth;
-using WsElecciones.Domain.Views.CuentaCorrienteCuotas;
 using WsElecciones.Persistence.Context;
 using WsElecciones.Persistence.SqlHelpers;
 using static System.Runtime.InteropServices.JavaScript.JSType;
@@ -20,13 +16,35 @@ namespace WsElecciones.Persistence.Repository
 {
     public class AuthRepository(CuentaCorrienteContext context, IStoredProcedureExecutor spExecutor): Repository<AppUser>(context), IAuthRepository
     {
-        private const string SpLogin = "up_Iniciar_Sesion_v01";
+        private const string SpLogin     = "up_Iniciar_Sesion_v01";
         private const string SpRegistrar = "up_Add_Users_v01";
-        private const string SqUpdate = "up_Add_Users_Personal_v01";
+        private const string SqUpdate    = "up_Add_Users_Personal_v01";
 
+        public async Task<ResponseView> CreateAsync(string correo, string claveHash, string perfil, CancellationToken cancellationToken = default)
+        {
+            var parameters = new[]
+            {
+                SqlParameterFactory.CreateVarchar("@Correo",50, correo),
+                SqlParameterFactory.CreateVarchar("@ClaveHash",60, claveHash),
+                SqlParameterFactory.CreateVarchar("@Perfil",50, perfil),
+            };
 
+            var result = await spExecutor.ExecuteReaderAsync(
+                SpRegistrar,
+                reader => new ResponseView(
+                    0,
+                    ConvertDbHelper.ToInt32(reader["Estado"]),
+                    ConvertDbHelper.ToString(reader["Mensaje"])
+                ),
+                parameters,
+                cancellationToken);
 
-        public async Task<GetAuthView> GetByUsernameAsync(string correo, CancellationToken cancellationToken= default)
+            var response = result.Cast<ResponseView>().FirstOrDefault();
+
+            return new ResponseView(response.Id,response.Estado,response.Mensaje);
+        }
+
+        public async Task<GetAuthView> GetByEmailAsync(string correo, CancellationToken cancellationToken = default)
         {
             var parameters = new[]
             {
@@ -72,40 +90,17 @@ namespace WsElecciones.Persistence.Repository
                 cancellationToken
             );
 
-            var users = results[0].Cast<UserDto>().ToList().AsReadOnly();
+            var user = results[0].Cast<UserDto>().FirstOrDefault() ?? throw new InvalidOperationException("Usuario no encontrado.");
             var menu = results[1].Cast<MenuDto>().ToList().AsReadOnly();
 
             return new GetAuthView(
                 Token: null,
                 Expiry: null,
-                User: users,
+                User: user,
                 Menu: menu
             );
-
         }
-
-        public async Task<IReadOnlyCollection<ResponseView>> RegistrarUserAsysc(string correo, string claveHash, string perfil, CancellationToken cancellationToken)
-        {
-            var parameters = new[]
-            {
-                SqlParameterFactory.CreateVarchar("@Correo",50, correo),
-                SqlParameterFactory.CreateVarchar("@ClaveHash",60, claveHash),
-                SqlParameterFactory.CreateVarchar("@Perfil",50, perfil),
-            };
-
-            var result = await spExecutor.ExecuteReaderAsync(
-                SpRegistrar,
-                reader => new ResponseView(
-                    ConvertDbHelper.ToInt32(reader["Estado"]),
-                    ConvertDbHelper.ToString(reader["Mensaje"])
-                ),
-                parameters,
-                cancellationToken);
-
-            return result;
-        }
-
-        public async Task<IReadOnlyCollection<ResponseView>> UpdateUserAsysc(UpdateUserView request, CancellationToken cancellationToken = default)
+        public async Task<ResponseView> UpdateAsync(UpdateUserView request, CancellationToken cancellationToken = default)
         {
             var parameters = new[]
             {
@@ -126,13 +121,17 @@ namespace WsElecciones.Persistence.Repository
             var result = await spExecutor.ExecuteReaderAsync(
                 SqUpdate,
                 reader => new ResponseView(
+                    0,
                     ConvertDbHelper.ToInt32(reader["Estado"]),
                     ConvertDbHelper.ToString(reader["Mensaje"])
                 ),
                 parameters,
                 cancellationToken);
 
-            return result;
+            var response = result.Cast<ResponseView>().FirstOrDefault();
+
+            return new ResponseView(response.Id, response.Estado, response.Mensaje);
         }
+
     }
 }

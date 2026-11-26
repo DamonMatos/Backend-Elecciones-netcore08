@@ -4,7 +4,7 @@ namespace WsElecciones.Domain.Views.Auth
     public sealed record GetAuthView(
         string? Token,
         DateTime? Expiry,
-        IReadOnlyCollection<UserDto> User,
+        UserDto User,
         IReadOnlyCollection<MenuDto> Menu
     );
 

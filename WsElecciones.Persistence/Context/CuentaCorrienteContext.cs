@@ -11,6 +11,7 @@ public partial class CuentaCorrienteContext : DbContext
 {
     public CuentaCorrienteContext()
     {
+
     }
 
     public CuentaCorrienteContext(DbContextOptions<CuentaCorrienteContext> options)
@@ -28,6 +29,13 @@ public partial class CuentaCorrienteContext : DbContext
     public virtual DbSet<AppElecciones> Elecciones { get; set; }
 
     public virtual DbSet<AppCliente> Clientes { get; set; }
+
+    public virtual DbSet<AppSelect> Select { get; set; }
+
+    public virtual DbSet<AppCandidato> Candidato { get; set; }
+    public virtual DbSet<AppColaborador> Colaborador { get; set; }
+
+
 
 
 
@@ -297,6 +305,12 @@ public partial class CuentaCorrienteContext : DbContext
         modelBuilder.Ignore<AppElecciones>();
 
         modelBuilder.Ignore<AppCliente>();
+
+        modelBuilder.Ignore<AppSelect>();
+
+        modelBuilder.Ignore<AppCandidato>();
+
+        modelBuilder.Ignore<AppColaborador>();
 
         OnModelCreatingPartial(modelBuilder);
     }

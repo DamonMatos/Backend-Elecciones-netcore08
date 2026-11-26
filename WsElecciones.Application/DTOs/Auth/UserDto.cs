@@ -20,6 +20,7 @@ public sealed record UserDto(
     int IdPerfil,
     string Perfil,
     string Correo,
+
     [property: JsonIgnore]
     string ClaveHash
 );

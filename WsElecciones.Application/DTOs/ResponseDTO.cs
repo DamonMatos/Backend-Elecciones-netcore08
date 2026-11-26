@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 namespace WsElecciones.Application.DTOs
 {
     public sealed record ResponseDTO(
+        int Id,
         int Estado,
         string Mensaje
     );
-
 
 }
